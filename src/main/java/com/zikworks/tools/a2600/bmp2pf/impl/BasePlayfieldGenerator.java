@@ -74,7 +74,7 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
             int argb = bufferedImage.getRGB(i, currentLine);
             boolean bit = colorModel.hasAlpha()
                     ? (colorModel.getAlpha(argb) != 0)
-                    : (argb != WHITE);
+                    : (argb != -1);
             lineData.add(bit);
         }
 
