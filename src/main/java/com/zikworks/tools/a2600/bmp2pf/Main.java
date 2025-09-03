@@ -16,12 +16,12 @@ public class Main {
         Options options = new Options()
                 .addOption(CommandLineOption.INPUT_FILE.toOption())
                 .addOption(CommandLineOption.OUTPUT_FILE.toOption())
-                .addOption(CommandLineOption.FULL_SCALE.toOption())
                 .addOption(CommandLineOption.BUFFER_OUTPUT.toOption())
+                .addOption(CommandLineOption.FULL_SCALE.toOption())
                 .addOption(CommandLineOption.SYMMETRICAL.toOption())
                 .addOption(CommandLineOption.ASYMMETRICAL.toOption())
-                .addOption(CommandLineOption.MIRRORED.toOption())
-                .addOption(CommandLineOption.REPEATED.toOption());
+                .addOption(CommandLineOption.REPEATED.toOption())
+                .addOption(CommandLineOption.MIRRORED.toOption());
 
         CommandLineParser commandLineParser = new DefaultParser();
 
