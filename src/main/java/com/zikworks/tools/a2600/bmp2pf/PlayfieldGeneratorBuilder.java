@@ -3,16 +3,27 @@ package com.zikworks.tools.a2600.bmp2pf;
 import com.zikworks.tools.a2600.bmp2pf.impl.SymmetricalPlayfieldGenerator;
 import org.apache.commons.cli.CommandLine;
 
+/**
+ * Help build a PlayfieldGenerator.
+ */
 public class PlayfieldGeneratorBuilder {
 
-    public enum PlayfieldRegistersMode {
-        REPEAT,
-        MIRROR
-    }
-
+    /**
+     * Whether the input/output is used with a symmetrical playfield
+     * or an asymmetrical one.  Determines the width of the input file.
+     */
     private enum GeneratorMode {
         SYMMETRICAL,
         ASYMMETRICAL
+    }
+
+    /**
+     * When generating an asymmetrical playfield controls whether the
+     * PF registers are in repeat or mirror mode.
+     */
+    public enum PlayfieldRegistersMode {
+        REPEAT,
+        MIRROR
     }
 
     private final String inputFile;
@@ -58,6 +69,11 @@ public class PlayfieldGeneratorBuilder {
         return playfieldRegistersMode;
     }
 
+    /**
+     * Build a new PlayfieldGenerator based on the current GeneratorMode.
+     *
+     * @return A new PlayfieldGenerator
+     */
     public PlayfieldGenerator build() {
         if (generatorMode == GeneratorMode.ASYMMETRICAL) {
             throw new IllegalArgumentException("Asymmetrical mode not yet implemented");

@@ -14,6 +14,11 @@ public class SymmetricalPlayfieldGenerator extends BasePlayfieldGenerator {
         super(builder);
     }
 
+    /**
+     * Generate the ASM output file from the input BMP file.
+     *
+     * @throws IOException I/O error during generation
+     */
     public void generate() throws IOException {
         // First open the input file, expecting a width of 20 pixels
         openInputFile(IMAGE_WIDTH);

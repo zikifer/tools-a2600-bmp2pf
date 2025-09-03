@@ -2,6 +2,9 @@ package com.zikworks.tools.a2600.bmp2pf;
 
 import org.apache.commons.cli.Option;
 
+/**
+ * The various command line options
+ */
 public enum CommandLineOption {
 
     INPUT_FILE('f', "file", true, true, "BMP file to parse"),
