@@ -17,13 +17,15 @@ public class PlayfieldGeneratorBuilder {
 
     private final String inputFile;
     private final String outputFile;
+    private final boolean fullScale;
     private final int outputBufferLines;
     private GeneratorMode generatorMode = GeneratorMode.SYMMETRICAL;
-    private PlayfieldRegistersMode playfieldRegistersMode = PlayfieldRegistersMode.MIRROR;
+    private PlayfieldRegistersMode playfieldRegistersMode = PlayfieldRegistersMode.REPEAT;
 
     PlayfieldGeneratorBuilder(CommandLine commandLine) {
         this.inputFile = commandLine.getOptionValue(CommandLineOption.INPUT_FILE.toOption());
         this.outputFile = commandLine.getOptionValue(CommandLineOption.OUTPUT_FILE.toOption());
+        this.fullScale = commandLine.hasOption(CommandLineOption.FULL_SCALE.toOption());
         this.outputBufferLines = commandLine.hasOption(CommandLineOption.BUFFER_OUTPUT.toOption())
                 ? Integer.parseInt(commandLine.getOptionValue(CommandLineOption.BUFFER_OUTPUT.toOption()))
                 : 0;
@@ -31,8 +33,8 @@ public class PlayfieldGeneratorBuilder {
         if (commandLine.hasOption(CommandLineOption.ASYMMETRICAL.toOption())) {
             this.generatorMode = GeneratorMode.ASYMMETRICAL;
         }
-        if (commandLine.hasOption(CommandLineOption.REPEATED.toOption())) {
-            this.playfieldRegistersMode = PlayfieldRegistersMode.REPEAT;
+        if (commandLine.hasOption(CommandLineOption.MIRRORED.toOption())) {
+            this.playfieldRegistersMode = PlayfieldRegistersMode.MIRROR;
         }
     }
 
@@ -42,6 +44,10 @@ public class PlayfieldGeneratorBuilder {
 
     public String getOutputFile() {
         return outputFile;
+    }
+
+    public boolean isFullScale() {
+        return fullScale;
     }
 
     public int getOutputBufferLines() {
