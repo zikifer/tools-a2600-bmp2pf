@@ -9,6 +9,12 @@ where there are different sections (`PF0DataA`, `PF1DataA`, and `PF2DataA`) with
 binary format.  It also builds the lists in reverse order (with the top of the screen at the bottom
 of the list) for use in standard `dex`/`dey` loops.
 
+It also outputs a colors section (`PFColors`).  The color for the line is determined by the first non-black / 
+non-transparent pixel in the row.  For the NTSC color it reads the BLUE value (byte `0x000000FF` of the RBGA value) 
+and for the PAL color it reads the GREEN value (byte `0x0000FF00` of the RBGA value).  The `PFColors` will have
+the NTSC color set with the PAL color as a comment following the NTSC value.  Naturally the NTSC/PAL colors
+will not match the actual color used in the file but at least the color data can be stored within the image.
+
 ## Usage
 
 `java -jar a2600-bmp2pf.jar -f [input BMP file] -o [output ASM file] [any optional parameters]`

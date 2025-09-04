@@ -5,7 +5,6 @@ import com.zikworks.tools.a2600.bmp2pf.PlayfieldGeneratorBuilder;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -37,98 +36,54 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
     private final String outputFile;
     private final boolean fullScale;
     private final int outputBufferLines;
-    private BufferedImage bufferedImage;
-    private ColorModel colorModel;
-    private int imageHeight;
-    private int currentLine;
-    private Map<String, List<String>> outputMap;
+    private final int expectedWidth;
+    private final Map<String, List<String>> outputMap;
 
-    protected BasePlayfieldGenerator(PlayfieldGeneratorBuilder builder) {
+    protected BasePlayfieldGenerator(PlayfieldGeneratorBuilder builder, int expectedWidth) {
         this.inputFile = builder.getInputFile();
         this.outputFile = builder.getOutputFile();
         this.fullScale = builder.isFullScale();
         this.outputBufferLines = builder.getOutputBufferLines();
+        this.expectedWidth = expectedWidth;
+        this.outputMap = new LinkedHashMap<>();
     }
 
     /**
-     * Get the number of empty lines to add to the end of the playfield.
+     * Generate the ASM output file from the input BMP file.
      *
-     * @return Number of empty lines
+     * @throws IOException I/O error during generation
      */
-    protected int getOutputBufferLines() {
-        return outputBufferLines;
-    }
+    public void generate() throws IOException {
+        // Open image and create reader
+        BufferedImage bufferedImage = ImageIO.read(new File(inputFile));
+        BitmapImageReader bitmapImageReader = fullScale
+                ? new WideBitmapImageReader(bufferedImage)
+                : new NarrowBitmapImageReader(bufferedImage);
 
-    /**
-     * Open the input file.
-     *
-     * @param requiredWidth Required width of the BMP
-     * @throws IOException Error opening the file or invalid width
-     */
-    protected void openInputFile(int requiredWidth) throws IOException {
-        bufferedImage = ImageIO.read(new File(inputFile));
-        int expectedWidth = fullScale ? (requiredWidth * 4) : requiredWidth;
-        if (bufferedImage.getWidth() != expectedWidth) {
-            throw new IOException("Invalid file format, required image width=" + expectedWidth);
-        }
-
-        colorModel = bufferedImage.getColorModel();
-        imageHeight = bufferedImage.getHeight();
-        currentLine = 0;
-        outputMap = new LinkedHashMap<>();
         System.out.println("Reading input file: " + inputFile);
-    }
 
-    /**
-     * Get the next line of the input file.  Length of the output list
-     * matches the width of the input file.
-     *
-     * @return A list of bits where true means the bit is set and false not set
-     */
-    protected LinkedList<Boolean> getNextLine() {
-        if (currentLine >= imageHeight) {
-            return new LinkedList<>();
+        // Verify input file is correct width
+        bitmapImageReader.checkWidth(expectedWidth);
+
+        while (bitmapImageReader.hasNext()) {
+            PlayfieldLineData lineData = bitmapImageReader.next();
+            parseLineData(lineData);
+            addColorData(lineData);
         }
 
-        LinkedList<Boolean> lineData = new LinkedList<>();
-        int width = bufferedImage.getWidth();
-        int inc = fullScale ? 4 : 1;
-        for (int x = 0; x < width; x += inc) {
-            boolean bit = fullScale ? getWidePixelBit(x) : getNarrowPixelBit(x);
-            lineData.add(bit);
+        // Add any extra empty lines
+        for (int i = 0; i < outputBufferLines; i++) {
+            var bits = IntStream.range(0, expectedWidth).mapToObj(ign -> Boolean.FALSE).toList();
+            PlayfieldLineData lineData = new PlayfieldLineData().withBits(bits);
+            parseLineData(lineData);
+            addColorData(lineData);
         }
 
-        currentLine++;
-        return lineData;
+        // Finally write output file
+        writeOutputFile(bufferedImage.getHeight());
     }
 
-    /**
-     * When in fullScale mode (-x option) a bit is represented by 4 continuous pixels.
-     *
-     * @param x X index
-     * @return True if the pixel is set; false otherwise
-     */
-    private boolean getWidePixelBit(int x) {
-        int sum = IntStream.range(x, x + 4)
-                .mapToObj(this::getNarrowPixelBit)
-                .map(BasePlayfieldGenerator::toInt)
-                .mapToInt(Integer::intValue)
-                .sum();
-        return sum > 1;
-    }
-
-    /**
-     * When in normal mode a bit is represented by a single pixel.
-     *
-     * @param x X index
-     * @return True if the pixel is set; false otherwise
-     */
-    private boolean getNarrowPixelBit(int x) {
-        int argb = bufferedImage.getRGB(x, currentLine);
-        return colorModel.hasAlpha()
-                ? (colorModel.getAlpha(argb) != 0)
-                : (argb != -1);
-    }
+    protected abstract void parseLineData(PlayfieldLineData lineData);
 
     /**
      * Remove a certain number of booleans from the head of the list and return them.
@@ -155,12 +110,35 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
     }
 
     /**
+     * Add the color data to the output map.
+     *
+     * @param lineData Playfield line data
+     */
+    private void addColorData(PlayfieldLineData lineData) {
+        String ntsc = Integer.toHexString(lineData.getNtscColor());
+        if (ntsc.length() == 1) {
+            ntsc = "0" + ntsc;
+        }
+
+        String pal = Integer.toHexString(lineData.getPalColor());
+        if (pal.length() == 1) {
+            pal = "0" + pal;
+        }
+
+        String line = String.format("   .byte $%s ; $%s", ntsc, pal);
+
+        String name = "PFColors     ; (NTSC : PAL)";
+        List<String> sectionData = outputMap.computeIfAbsent(name, ign -> new LinkedList<>());
+        sectionData.addFirst(line);
+    }
+
+    /**
      * Write the output file.
      *
      * @throws IOException Error writing to file
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    protected void writeOutputFile() throws IOException {
+    private void writeOutputFile(int imageHeight) throws IOException {
         Path outputPath = Path.of(outputFile).toAbsolutePath().normalize();
         outputPath.getParent().toFile().mkdirs();
 
@@ -168,17 +146,16 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
             // Write the header portion
             int length = imageHeight + outputBufferLines;
             writer.write(OUTPUT_FILE_START + length + System.lineSeparator());
-            writer.write(ALIGNMENT_BLOCK);
 
             // Write each segment
             var keySet = outputMap.keySet();
             for (String name : keySet) {
+                writer.write(ALIGNMENT_BLOCK);
+
                 writer.write(name + System.lineSeparator());
                 for (String dataLine : outputMap.get(name)) {
                     writer.write(dataLine + System.lineSeparator());
                 }
-
-                writer.write(ALIGNMENT_BLOCK);
             }
         }
 
@@ -228,16 +205,6 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
      */
     private static String getByte(List<Boolean> bits) {
         return bits.stream().map(BasePlayfieldGenerator::toStr).collect(Collectors.joining(""));
-    }
-
-    /**
-     * Convert a boolean to an integer.
-     *
-     * @param bit Bit to convert
-     * @return The value 1 if passed true; otherwise 0
-     */
-    private static int toInt(boolean bit) {
-        return bit ? 1 : 0;
     }
 
     /**
