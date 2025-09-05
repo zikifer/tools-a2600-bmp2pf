@@ -17,6 +17,7 @@ public enum CommandLineOption {
     REPEATED('r', "repeated", false, false, "When asymmetrical repeat PF registers");
 
     final Option option;
+
     CommandLineOption(char opt,
                       String longOption,
                       boolean isRequired,

@@ -102,7 +102,7 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
      * Save a byte to the given section of the output file.
      *
      * @param sectionName Section name for the byte
-     * @param data Byte data
+     * @param data        Byte data
      */
     protected void addByteToSection(String sectionName, String data) {
         List<String> sectionData = outputMap.computeIfAbsent(sectionName, ign -> new LinkedList<>());
@@ -163,37 +163,30 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
     }
 
     /**
-     * Convert a list of bits to string for use with PF0.
-     * PF0 only uses the upper 4 bits, and are written in reverse order.
+     * Convert a list of bits to string for use with a half PF register (PF0).
      *
-     * @param bits Bits to convert
-     * @return Byte data to be written to PF0
+     * @param bits    Bits to convert
+     * @param reverse Whether to reverse the bits
+     * @return Byte data to be written to PF register
      */
-    protected static String getPF0Byte(List<Boolean> bits) {
-        Collections.reverse(bits);
+    protected static String getHalfPFByte(List<Boolean> bits, boolean reverse) {
+        if (reverse) {
+            Collections.reverse(bits);
+        }
         return getByte(bits) + "0000";
     }
 
     /**
-     * Convert a list of bits to string for use with PF1.
-     * PF1 bits are written in order.
+     * Convert a list of bits to string for use with a full PF register (PF1/2).
      *
-     * @param bits Bits to convert
-     * @return Byte data to be written to PF1
+     * @param bits    Bits to convert
+     * @param reverse Whether to reverse the bits
+     * @return Byte data to be written to PF register
      */
-    protected static String getPF1Byte(List<Boolean> bits) {
-        return getByte(bits);
-    }
-
-    /**
-     * Convert a list of bits to string for use with PF2.
-     * PF2 bits are written in reverse order.
-     *
-     * @param bits Bits to convert
-     * @return Byte data to be written to PF2
-     */
-    protected static String getPF2Byte(List<Boolean> bits) {
-        Collections.reverse(bits);
+    protected static String getFullPFByte(List<Boolean> bits, boolean reverse) {
+        if (reverse) {
+            Collections.reverse(bits);
+        }
         return getByte(bits);
     }
 

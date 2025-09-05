@@ -1,5 +1,7 @@
 package com.zikworks.tools.a2600.bmp2pf;
 
+import com.zikworks.tools.a2600.bmp2pf.impl.AsymmetricalMirrorPlayfieldGenerator;
+import com.zikworks.tools.a2600.bmp2pf.impl.AsymmetricalRepeatPlayfieldGenerator;
 import com.zikworks.tools.a2600.bmp2pf.impl.SymmetricalPlayfieldGenerator;
 import org.apache.commons.cli.CommandLine;
 
@@ -21,7 +23,7 @@ public class PlayfieldGeneratorBuilder {
      * When generating an asymmetrical playfield controls whether the
      * PF registers are in repeat or mirror mode.
      */
-    public enum PlayfieldRegistersMode {
+    private enum PlayfieldRegistersMode {
         REPEAT,
         MIRROR
     }
@@ -47,6 +49,17 @@ public class PlayfieldGeneratorBuilder {
         if (commandLine.hasOption(CommandLineOption.MIRRORED.toOption())) {
             this.playfieldRegistersMode = PlayfieldRegistersMode.MIRROR;
         }
+
+        System.out.println("Running with options:");
+        System.out.println(" - Input File: " + inputFile);
+        System.out.println(" - Output File: " + outputFile);
+        System.out.println(" - Scaled? " + fullScale);
+        System.out.println(" - Output Buffer Lines: " + outputBufferLines);
+
+        String mode = generatorMode == GeneratorMode.SYMMETRICAL
+                ? " - Mode: " + generatorMode
+                : String.format(" - Mode: %s (%s)", generatorMode, playfieldRegistersMode);
+        System.out.println(mode);
     }
 
     public String getInputFile() {
@@ -65,20 +78,23 @@ public class PlayfieldGeneratorBuilder {
         return outputBufferLines;
     }
 
-    public PlayfieldRegistersMode getPlayfieldRegistersMode() {
-        return playfieldRegistersMode;
-    }
-
     /**
      * Build a new PlayfieldGenerator based on the current GeneratorMode.
      *
      * @return A new PlayfieldGenerator
      */
     public PlayfieldGenerator build() {
+        PlayfieldGenerator generator;
         if (generatorMode == GeneratorMode.ASYMMETRICAL) {
-            throw new IllegalArgumentException("Asymmetrical mode not yet implemented");
+            if (playfieldRegistersMode == PlayfieldRegistersMode.REPEAT) {
+                generator = new AsymmetricalRepeatPlayfieldGenerator(this);
+            } else {
+                generator = new AsymmetricalMirrorPlayfieldGenerator(this);
+            }
+        } else {
+            generator = new SymmetricalPlayfieldGenerator(this);
         }
 
-        return new SymmetricalPlayfieldGenerator(this);
+        return generator;
     }
 }
