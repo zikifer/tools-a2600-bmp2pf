@@ -1,7 +1,10 @@
 package com.zikworks.tools.a2600.bmp2pf.impl;
 
+import com.zikworks.tools.a2600.bmp2pf.BitmapImageReader;
 import com.zikworks.tools.a2600.bmp2pf.PlayfieldGenerator;
 import com.zikworks.tools.a2600.bmp2pf.PlayfieldGeneratorBuilder;
+import com.zikworks.tools.a2600.bmp2pf.PlayfieldLineDataParser;
+import com.zikworks.tools.a2600.bmp2pf.PlayfieldOutputSection;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -9,19 +12,17 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
  * An abstract class the contains all the methods that are used regardless
  * of symmetrical or asymmetrical playfield generation.
  */
-public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
+public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
     private static final String BYTE_PREFIX = "    .byte %";
     private static final String OUTPUT_FILE_START = "PLAYFIELD_HEIGHT = ";
     private static final String ALIGNMENT_BLOCK = """
@@ -36,15 +37,15 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
     private final String outputFile;
     private final boolean fullScale;
     private final int outputBufferLines;
-    private final int expectedWidth;
-    private final Map<String, List<String>> outputMap;
+    private final PlayfieldLineDataParser parser;
+    private final Map<PlayfieldOutputSection, List<String>> outputMap;
 
-    protected BasePlayfieldGenerator(PlayfieldGeneratorBuilder builder, int expectedWidth) {
+    public PlayfieldGeneratorImpl(PlayfieldGeneratorBuilder builder, PlayfieldLineDataParser parser) {
         this.inputFile = builder.getInputFile();
         this.outputFile = builder.getOutputFile();
         this.fullScale = builder.isFullScale();
         this.outputBufferLines = builder.getOutputBufferLines();
-        this.expectedWidth = expectedWidth;
+        this.parser = parser;
         this.outputMap = new LinkedHashMap<>();
     }
 
@@ -63,11 +64,13 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
         System.out.println("Reading input file: " + inputFile);
 
         // Verify input file is correct width
+        int expectedWidth = parser.getExpectedWidth();
         bitmapImageReader.checkWidth(expectedWidth);
 
         while (bitmapImageReader.hasNext()) {
             PlayfieldLineData lineData = bitmapImageReader.next();
-            parseLineData(lineData);
+            var parsedLine = parser.parseLineData(lineData);
+            addParsedLineToOutputMap(parsedLine);
             addColorData(lineData);
         }
 
@@ -75,7 +78,8 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
         for (int i = 0; i < outputBufferLines; i++) {
             var bits = IntStream.range(0, expectedWidth).mapToObj(ign -> Boolean.FALSE).toList();
             PlayfieldLineData lineData = new PlayfieldLineData().withBits(bits);
-            parseLineData(lineData);
+            var parsedLine = parser.parseLineData(lineData);
+            addParsedLineToOutputMap(parsedLine);
             addColorData(lineData);
         }
 
@@ -83,30 +87,11 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
         writeOutputFile(bufferedImage.getHeight());
     }
 
-    protected abstract void parseLineData(PlayfieldLineData lineData);
-
-    /**
-     * Remove a certain number of booleans from the head of the list and return them.
-     *
-     * @param lineData List to manipulate
-     * @param count    Number of elements to remove and return
-     * @return A list of the removed elements
-     */
-    protected List<Boolean> popFromLineData(LinkedList<Boolean> lineData, int count) {
-        return IntStream.range(0, count)
-                .mapToObj(ign -> lineData.removeFirst())
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Save a byte to the given section of the output file.
-     *
-     * @param sectionName Section name for the byte
-     * @param data        Byte data
-     */
-    protected void addByteToSection(String sectionName, String data) {
-        List<String> sectionData = outputMap.computeIfAbsent(sectionName, ign -> new LinkedList<>());
-        sectionData.addFirst(BYTE_PREFIX + data);
+    private void addParsedLineToOutputMap(Map<PlayfieldOutputSection, String> parsedLineData) {
+        parsedLineData.forEach((section, data) -> {
+            List<String> sectionData = outputMap.computeIfAbsent(section, ign -> new LinkedList<>());
+            sectionData.addFirst(BYTE_PREFIX + data);
+        });
     }
 
     /**
@@ -127,8 +112,7 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
 
         String line = String.format("   .byte $%s ; $%s", ntsc, pal);
 
-        String name = "PFColors     ; (NTSC : PAL)";
-        List<String> sectionData = outputMap.computeIfAbsent(name, ign -> new LinkedList<>());
+        List<String> sectionData = outputMap.computeIfAbsent(PlayfieldOutputSection.PFColors, ign -> new LinkedList<>());
         sectionData.addFirst(line);
     }
 
@@ -149,64 +133,16 @@ public abstract class BasePlayfieldGenerator implements PlayfieldGenerator {
 
             // Write each segment
             var keySet = outputMap.keySet();
-            for (String name : keySet) {
+            for (PlayfieldOutputSection section : keySet) {
                 writer.write(ALIGNMENT_BLOCK);
 
-                writer.write(name + System.lineSeparator());
-                for (String dataLine : outputMap.get(name)) {
+                writer.write(section.name() + System.lineSeparator());
+                for (String dataLine : outputMap.get(section)) {
                     writer.write(dataLine + System.lineSeparator());
                 }
             }
         }
 
         System.out.println("Wrote output file: " + outputFile);
-    }
-
-    /**
-     * Convert a list of bits to string for use with a half PF register (PF0).
-     *
-     * @param bits    Bits to convert
-     * @param reverse Whether to reverse the bits
-     * @return Byte data to be written to PF register
-     */
-    protected static String getHalfPFByte(List<Boolean> bits, boolean reverse) {
-        if (reverse) {
-            Collections.reverse(bits);
-        }
-        return getByte(bits) + "0000";
-    }
-
-    /**
-     * Convert a list of bits to string for use with a full PF register (PF1/2).
-     *
-     * @param bits    Bits to convert
-     * @param reverse Whether to reverse the bits
-     * @return Byte data to be written to PF register
-     */
-    protected static String getFullPFByte(List<Boolean> bits, boolean reverse) {
-        if (reverse) {
-            Collections.reverse(bits);
-        }
-        return getByte(bits);
-    }
-
-    /**
-     * Convert a list of bits to a byte string.
-     *
-     * @param bits List of bits
-     * @return String of 0's and 1's in the same order as the bits in the list
-     */
-    private static String getByte(List<Boolean> bits) {
-        return bits.stream().map(BasePlayfieldGenerator::toStr).collect(Collectors.joining(""));
-    }
-
-    /**
-     * Convert a boolean to a string.
-     *
-     * @param bit Bit to convert
-     * @return "1" if passed true; "0" if passed false
-     */
-    private static String toStr(boolean bit) {
-        return bit ? "1" : "0";
     }
 }

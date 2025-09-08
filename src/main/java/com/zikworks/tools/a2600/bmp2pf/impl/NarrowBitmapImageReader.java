@@ -1,5 +1,7 @@
 package com.zikworks.tools.a2600.bmp2pf.impl;
 
+import com.zikworks.tools.a2600.bmp2pf.BitmapImageReader;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 

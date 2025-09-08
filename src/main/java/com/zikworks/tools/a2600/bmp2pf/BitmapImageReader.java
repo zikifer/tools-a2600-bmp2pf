@@ -1,6 +1,8 @@
-package com.zikworks.tools.a2600.bmp2pf.impl;
+package com.zikworks.tools.a2600.bmp2pf;
 
-import java.awt.*;
+import com.zikworks.tools.a2600.bmp2pf.impl.PlayfieldLineData;
+
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.IOException;

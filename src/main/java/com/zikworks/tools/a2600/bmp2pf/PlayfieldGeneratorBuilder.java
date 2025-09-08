@@ -1,8 +1,9 @@
 package com.zikworks.tools.a2600.bmp2pf;
 
-import com.zikworks.tools.a2600.bmp2pf.impl.AsymmetricalMirrorPlayfieldGenerator;
-import com.zikworks.tools.a2600.bmp2pf.impl.AsymmetricalRepeatPlayfieldGenerator;
-import com.zikworks.tools.a2600.bmp2pf.impl.SymmetricalPlayfieldGenerator;
+import com.zikworks.tools.a2600.bmp2pf.impl.AsymmetricalMirrorPlayfieldLineDataParser;
+import com.zikworks.tools.a2600.bmp2pf.impl.AsymmetricalRepeatPlayfieldLineDataParser;
+import com.zikworks.tools.a2600.bmp2pf.impl.PlayfieldGeneratorImpl;
+import com.zikworks.tools.a2600.bmp2pf.impl.SymmetricalPlayfieldLineDataParser;
 import org.apache.commons.cli.CommandLine;
 
 /**
@@ -84,17 +85,18 @@ public class PlayfieldGeneratorBuilder {
      * @return A new PlayfieldGenerator
      */
     public PlayfieldGenerator build() {
-        PlayfieldGenerator generator;
+        PlayfieldLineDataParser parser;
+
         if (generatorMode == GeneratorMode.ASYMMETRICAL) {
             if (playfieldRegistersMode == PlayfieldRegistersMode.REPEAT) {
-                generator = new AsymmetricalRepeatPlayfieldGenerator(this);
+                parser = new AsymmetricalRepeatPlayfieldLineDataParser();
             } else {
-                generator = new AsymmetricalMirrorPlayfieldGenerator(this);
+                parser = new AsymmetricalMirrorPlayfieldLineDataParser();
             }
         } else {
-            generator = new SymmetricalPlayfieldGenerator(this);
+            parser = new SymmetricalPlayfieldLineDataParser();
         }
 
-        return generator;
+        return new PlayfieldGeneratorImpl(this, parser);
     }
 }
