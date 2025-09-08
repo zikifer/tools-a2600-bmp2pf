@@ -7,6 +7,7 @@ public class PlayfieldLineData {
     private int ntscColor;
     private int palColor;
     private List<Boolean> bits = new ArrayList<>();
+    private List<Boolean> collisions = new ArrayList<>();
 
     public int getNtscColor() {
         return ntscColor;
@@ -34,7 +35,6 @@ public class PlayfieldLineData {
         return bits;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
     public PlayfieldLineData withBit(boolean bit) {
         bits.add(bit);
         return this;
@@ -42,6 +42,21 @@ public class PlayfieldLineData {
 
     public PlayfieldLineData withBits(List<Boolean> bits) {
         this.bits = bits;
+        return this;
+    }
+
+    public List<Boolean> getCollisions() {
+        return collisions;
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    public PlayfieldLineData withCollide(boolean collide) {
+        collisions.add(collide);
+        return this;
+    }
+
+    public PlayfieldLineData withCollisions(List<Boolean> collisions) {
+        this.collisions = collisions;
         return this;
     }
 }

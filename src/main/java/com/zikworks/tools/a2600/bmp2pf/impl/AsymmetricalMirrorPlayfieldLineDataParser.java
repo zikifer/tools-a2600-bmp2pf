@@ -15,32 +15,32 @@ public class AsymmetricalMirrorPlayfieldLineDataParser extends AsymmetricalPlayf
 
         // First 4 bits are PF0
         var pfData = popFromLineData(bits, 4);
-        String pfByte = getHalfPFByte(pfData, true);
+        String pfByte = getPFByte(pfData, true);
         result.put(PlayfieldOutputSection.PF0DataA, pfByte);
 
         // Next 8 bits are PF1
         pfData = popFromLineData(bits, 8);
-        pfByte = getFullPFByte(pfData, false);
+        pfByte = getPFByte(pfData, false);
         result.put(PlayfieldOutputSection.PF1DataA, pfByte);
 
         // Next 8 bits are PF2
         pfData = popFromLineData(bits, 8);
-        pfByte = getFullPFByte(pfData, true);
+        pfByte = getPFByte(pfData, true);
         result.put(PlayfieldOutputSection.PF2DataA, pfByte);
 
         // Next 8 bits are PF2 again
         pfData = popFromLineData(bits, 8);
-        pfByte = getFullPFByte(pfData, false);
+        pfByte = getPFByte(pfData, false);
         result.put(PlayfieldOutputSection.PF2DataB, pfByte);
 
         // Next 8 bits are PF1 again
         pfData = popFromLineData(bits, 8);
-        pfByte = getFullPFByte(pfData, true);
+        pfByte = getPFByte(pfData, true);
         result.put(PlayfieldOutputSection.PF1DataB, pfByte);
 
         // Last 4 bits are PF0 again
         pfData = popFromLineData(bits, 4);
-        pfByte = getHalfPFByte(pfData, false);
+        pfByte = getPFByte(pfData, false);
         result.put(PlayfieldOutputSection.PF0DataB, pfByte);
 
         return result;

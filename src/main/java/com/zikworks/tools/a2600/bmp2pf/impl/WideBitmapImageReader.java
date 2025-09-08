@@ -47,6 +47,7 @@ public class WideBitmapImageReader extends BitmapImageReader {
             boolean bit = getBit(rgb);
             int ntsc = bit ? getNtscColor(rgb) : 0;
             int pal = bit ? getPalColor(rgb) : 0;
+            boolean collide = bit && isCollision(rgb);
 
             widePixel += (bit) ? 1 : 0;
             if (wideNtsc == 0) {
@@ -61,7 +62,8 @@ public class WideBitmapImageReader extends BitmapImageReader {
                 playfieldLineData
                         .withNtscColor(wideNtsc)
                         .withPalColor(widePal)
-                        .withBit(widePixel > 1);
+                        .withBit(widePixel > 1)
+                        .withCollide(collide);
 
                 widePixel = 0;
                 wideNtsc = 0;

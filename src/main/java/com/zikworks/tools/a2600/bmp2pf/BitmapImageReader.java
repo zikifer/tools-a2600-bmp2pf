@@ -69,4 +69,9 @@ public abstract class BitmapImageReader implements Iterator<PlayfieldLineData> {
         Color color = new Color(rgb);
         return color.getGreen();
     }
+
+    protected boolean isCollision(int rgb) {
+        Color color = new Color(rgb);
+        return color.getRed() > 7;
+    }
 }

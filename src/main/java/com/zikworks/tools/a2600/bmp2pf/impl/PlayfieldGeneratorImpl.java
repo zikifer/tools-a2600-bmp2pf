@@ -5,6 +5,7 @@ import com.zikworks.tools.a2600.bmp2pf.PlayfieldGenerator;
 import com.zikworks.tools.a2600.bmp2pf.PlayfieldGeneratorBuilder;
 import com.zikworks.tools.a2600.bmp2pf.PlayfieldLineDataParser;
 import com.zikworks.tools.a2600.bmp2pf.PlayfieldOutputSection;
+import com.zikworks.tools.a2600.bmp2pf.Utilities;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,15 +74,17 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
             var parsedLine = parser.parseLineData(lineData);
             addParsedLineToOutputMap(parsedLine);
             addColorData(lineData);
+            addCollisionData(lineData);
         }
 
         // Add any extra empty lines
         for (int i = 0; i < outputBufferLines; i++) {
-            var bits = IntStream.range(0, expectedWidth).mapToObj(ign -> Boolean.FALSE).toList();
-            PlayfieldLineData lineData = new PlayfieldLineData().withBits(bits);
+            var bits = new ArrayList<>(IntStream.range(0, expectedWidth).mapToObj(ign -> Boolean.FALSE).toList());
+            PlayfieldLineData lineData = new PlayfieldLineData().withBits(bits).withCollisions(bits);
             var parsedLine = parser.parseLineData(lineData);
             addParsedLineToOutputMap(parsedLine);
             addColorData(lineData);
+            addCollisionData(lineData);
         }
 
         // Finally write output file
@@ -89,7 +93,7 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
 
     private void addParsedLineToOutputMap(Map<PlayfieldOutputSection, String> parsedLineData) {
         parsedLineData.forEach((section, data) -> {
-            List<String> sectionData = outputMap.computeIfAbsent(section, ign -> new LinkedList<>());
+            List<String> sectionData = getSectionDataFromOutputMap(section);
             sectionData.addFirst(BYTE_PREFIX + data);
         });
     }
@@ -112,7 +116,23 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
 
         String line = String.format("   .byte $%s ; $%s", ntsc, pal);
 
-        List<String> sectionData = outputMap.computeIfAbsent(PlayfieldOutputSection.PFColors, ign -> new LinkedList<>());
+        List<String> sectionData = getSectionDataFromOutputMap(PlayfieldOutputSection.PFColors);
+        sectionData.addFirst(line);
+    }
+
+    private void addCollisionData(PlayfieldLineData lineData) {
+        List<Boolean> collisions = lineData.getCollisions();
+        List<String> bytes = new ArrayList<>();
+        int chunkSize = 8;
+        for (int i = 0; i < collisions.size(); i += chunkSize) {
+            int end = Math.min(i + chunkSize, collisions.size());
+            var sublist = new ArrayList<>(collisions.subList(i, end));
+            String byteData = "%" + Utilities.getByte(sublist);
+            bytes.add(byteData);
+        }
+
+        String line = "   .byte " + String.join(", ", bytes);
+        List<String> sectionData = getSectionDataFromOutputMap(PlayfieldOutputSection.PFCollision);
         sectionData.addFirst(line);
     }
 
@@ -144,5 +164,9 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
         }
 
         System.out.println("Wrote output file: " + outputFile);
+    }
+
+    private List<String> getSectionDataFromOutputMap(PlayfieldOutputSection section) {
+        return outputMap.computeIfAbsent(section, ign -> new LinkedList<>());
     }
 }

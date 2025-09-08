@@ -36,8 +36,9 @@ public class NarrowBitmapImageReader extends BitmapImageReader {
             boolean bit = getBit(rgb);
             int ntsc = bit ? getNtscColor(rgb) : 0;
             int pal = bit ? getPalColor(rgb) : 0;
+            boolean collide = bit && isCollision(rgb);
 
-            playfieldLineData.withNtscColor(ntsc).withPalColor(pal).withBit(bit);
+            playfieldLineData.withNtscColor(ntsc).withPalColor(pal).withBit(bit).withCollide(collide);
         }
 
         return playfieldLineData;

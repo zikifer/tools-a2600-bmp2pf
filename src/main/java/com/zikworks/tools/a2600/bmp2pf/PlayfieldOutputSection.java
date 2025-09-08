@@ -7,5 +7,6 @@ public enum PlayfieldOutputSection {
     PF0DataB,
     PF1DataB,
     PF2DataB,
-    PFColors
+    PFColors,
+    PFCollision
 }
