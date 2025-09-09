@@ -33,6 +33,8 @@ public class PlayfieldGeneratorBuilder {
     private final String inputFile;
     private final String outputFile;
     private final boolean fullScale;
+    private final boolean excludeColor;
+    private final boolean excludeCollision;
     private final int outputBufferLines;
     private GeneratorMode generatorMode = GeneratorMode.SYMMETRICAL;
     private PlayfieldRegistersMode playfieldRegistersMode = PlayfieldRegistersMode.REPEAT;
@@ -41,6 +43,8 @@ public class PlayfieldGeneratorBuilder {
         this.inputFile = commandLine.getOptionValue(CommandLineOption.INPUT_FILE.toOption());
         this.outputFile = commandLine.getOptionValue(CommandLineOption.OUTPUT_FILE.toOption());
         this.fullScale = commandLine.hasOption(CommandLineOption.FULL_SCALE.toOption());
+        this.excludeColor = commandLine.hasOption(CommandLineOption.NO_COLOR.toOption());
+        this.excludeCollision = commandLine.hasOption(CommandLineOption.NO_COLLISION.toOption());
         this.outputBufferLines = commandLine.hasOption(CommandLineOption.BUFFER_OUTPUT.toOption())
                 ? Integer.parseInt(commandLine.getOptionValue(CommandLineOption.BUFFER_OUTPUT.toOption()))
                 : 0;
@@ -78,6 +82,14 @@ public class PlayfieldGeneratorBuilder {
 
     public boolean isFullScale() {
         return fullScale;
+    }
+
+    public boolean isExcludeColor() {
+        return excludeColor;
+    }
+
+    public boolean isExcludeCollision() {
+        return excludeCollision;
     }
 
     public int getOutputBufferLines() {

@@ -39,6 +39,8 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
     private final String inputFile;
     private final String outputFile;
     private final boolean fullScale;
+    private final boolean excludeColor;
+    private final boolean excludeCollision;
     private final int outputBufferLines;
     private final PlayfieldLineDataParser parser;
     private final Map<PlayfieldOutputSection, List<String>> outputMap;
@@ -47,6 +49,8 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
         this.inputFile = builder.getInputFile();
         this.outputFile = builder.getOutputFile();
         this.fullScale = builder.isFullScale();
+        this.excludeColor = builder.isExcludeColor();
+        this.excludeCollision = builder.isExcludeCollision();
         this.outputBufferLines = builder.getOutputBufferLines();
         this.parser = parser;
         this.outputMap = new LinkedHashMap<>();
@@ -159,6 +163,10 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
                     continue;
                 }
 
+                if (excludeColor && (section == PlayfieldOutputSection.PFColors)) {
+                    continue;
+                }
+
                 writer.write(ALIGNMENT_BLOCK);
                 writer.write(section.name() + System.lineSeparator());
                 for (String dataLine : outputMap.get(section)) {
@@ -166,34 +174,36 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
                 }
             }
 
-            List<String> data = outputMap.get(PlayfieldOutputSection.PFCollision);
-            if (data != null) {
-                writer.write(ALIGNMENT_BLOCK);
-                int sectionCount = 0;
-                int chunkSize = 8;
-                for (int i = 0; i < data.size(); i += chunkSize, sectionCount++) {
-                    int end = Math.min(i + chunkSize, data.size());
-                    var sublist = new ArrayList<>(data.subList(i, end));
-                    String sectionName = PlayfieldOutputSection.PFCollision.name() + sectionCount;
-                    writer.write(sectionName + System.lineSeparator());
-                    for (String dataLine : sublist) {
+            if (!excludeCollision) {
+                List<String> data = outputMap.get(PlayfieldOutputSection.PFCollision);
+                if (data != null) {
+                    writer.write(ALIGNMENT_BLOCK);
+                    int sectionCount = 0;
+                    int chunkSize = 8;
+                    for (int i = 0; i < data.size(); i += chunkSize, sectionCount++) {
+                        int end = Math.min(i + chunkSize, data.size());
+                        var sublist = new ArrayList<>(data.subList(i, end));
+                        String sectionName = PlayfieldOutputSection.PFCollision.name() + sectionCount;
+                        writer.write(sectionName + System.lineSeparator());
+                        for (String dataLine : sublist) {
+                            writer.write(dataLine + System.lineSeparator());
+                        }
+                    }
+
+                    String sectionName = PlayfieldOutputSection.PFCollision.name();
+                    writer.write(System.lineSeparator());
+                    writer.write(sectionName + "_Lo" + System.lineSeparator());
+                    for (int i = 0; i < sectionCount; i++) {
+                        String dataLine = DATA_LINE_PREFIX + "#<" + sectionName + i;
                         writer.write(dataLine + System.lineSeparator());
                     }
-                }
 
-                String sectionName = PlayfieldOutputSection.PFCollision.name();
-                writer.write(System.lineSeparator());
-                writer.write(sectionName + "_Lo" + System.lineSeparator());
-                for (int i = 0; i < sectionCount; i++) {
-                    String dataLine = DATA_LINE_PREFIX + "#<" + sectionName + i;
-                    writer.write(dataLine + System.lineSeparator());
-                }
-
-                writer.write(System.lineSeparator());
-                writer.write(sectionName + "_Hi" + System.lineSeparator());
-                for (int i = 0; i < sectionCount; i++) {
-                    String dataLine = DATA_LINE_PREFIX + "#>" + sectionName + i;
-                    writer.write(dataLine + System.lineSeparator());
+                    writer.write(System.lineSeparator());
+                    writer.write(sectionName + "_Hi" + System.lineSeparator());
+                    for (int i = 0; i < sectionCount; i++) {
+                        String dataLine = DATA_LINE_PREFIX + "#>" + sectionName + i;
+                        writer.write(dataLine + System.lineSeparator());
+                    }
                 }
             }
         }
