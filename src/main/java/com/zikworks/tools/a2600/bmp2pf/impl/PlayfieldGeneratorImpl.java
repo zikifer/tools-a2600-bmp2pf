@@ -25,7 +25,8 @@ import java.util.stream.IntStream;
  * of symmetrical or asymmetrical playfield generation.
  */
 public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
-    private static final String BYTE_PREFIX = "    .byte %";
+    private static final String DATA_LINE_PREFIX = "    .byte ";
+    private static final String BYTE_PREFIX = DATA_LINE_PREFIX + "%";
     private static final String OUTPUT_FILE_START = "PLAYFIELD_HEIGHT = ";
     private static final String ALIGNMENT_BLOCK = """
             
@@ -154,10 +155,44 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
             // Write each segment
             var keySet = outputMap.keySet();
             for (PlayfieldOutputSection section : keySet) {
-                writer.write(ALIGNMENT_BLOCK);
+                if (section == PlayfieldOutputSection.PFCollision) {
+                    continue;
+                }
 
+                writer.write(ALIGNMENT_BLOCK);
                 writer.write(section.name() + System.lineSeparator());
                 for (String dataLine : outputMap.get(section)) {
+                    writer.write(dataLine + System.lineSeparator());
+                }
+            }
+
+            List<String> data = outputMap.get(PlayfieldOutputSection.PFCollision);
+            if (data != null) {
+                writer.write(ALIGNMENT_BLOCK);
+                int sectionCount = 0;
+                int chunkSize = 8;
+                for (int i = 0; i < data.size(); i += chunkSize, sectionCount++) {
+                    int end = Math.min(i + chunkSize, data.size());
+                    var sublist = new ArrayList<>(data.subList(i, end));
+                    String sectionName = PlayfieldOutputSection.PFCollision.name() + sectionCount;
+                    writer.write(sectionName + System.lineSeparator());
+                    for (String dataLine : sublist) {
+                        writer.write(dataLine + System.lineSeparator());
+                    }
+                }
+
+                String sectionName = PlayfieldOutputSection.PFCollision.name();
+                writer.write(System.lineSeparator());
+                writer.write(sectionName + "_Lo" + System.lineSeparator());
+                for (int i = 0; i < sectionCount; i++) {
+                    String dataLine = DATA_LINE_PREFIX + "#<" + sectionName + i;
+                    writer.write(dataLine + System.lineSeparator());
+                }
+
+                writer.write(System.lineSeparator());
+                writer.write(sectionName + "_Hi" + System.lineSeparator());
+                for (int i = 0; i < sectionCount; i++) {
+                    String dataLine = DATA_LINE_PREFIX + "#>" + sectionName + i;
                     writer.write(dataLine + System.lineSeparator());
                 }
             }
