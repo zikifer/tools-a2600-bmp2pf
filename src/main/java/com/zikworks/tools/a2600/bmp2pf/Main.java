@@ -22,6 +22,7 @@ public class Main {
                 .addOption(CommandLineOption.ASYMMETRICAL.toOption())
                 .addOption(CommandLineOption.REPEATED.toOption())
                 .addOption(CommandLineOption.MIRRORED.toOption())
+                .addOption(CommandLineOption.KERNEL.toOption())
                 .addOption(CommandLineOption.NO_COLOR.toOption())
                 .addOption(CommandLineOption.NO_COLLISION.toOption());
 

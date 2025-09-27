@@ -41,6 +41,7 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
     private final boolean fullScale;
     private final boolean excludeColor;
     private final boolean excludeCollision;
+    private final int kernelLines;
     private final int outputBufferLines;
     private final PlayfieldLineDataParser parser;
     private final Map<PlayfieldOutputSection, List<String>> outputMap;
@@ -51,6 +52,7 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
         this.fullScale = builder.isFullScale();
         this.excludeColor = builder.isExcludeColor();
         this.excludeCollision = builder.isExcludeCollision();
+        this.kernelLines = builder.getKernelLines();
         this.outputBufferLines = builder.getOutputBufferLines();
         this.parser = parser;
         this.outputMap = new LinkedHashMap<>();
@@ -65,8 +67,8 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
         // Open image and create reader
         BufferedImage bufferedImage = ImageIO.read(new File(inputFile));
         BitmapImageReader bitmapImageReader = fullScale
-                ? new WideBitmapImageReader(bufferedImage)
-                : new NarrowBitmapImageReader(bufferedImage);
+                ? new WideBitmapImageReader(bufferedImage, kernelLines)
+                : new NarrowBitmapImageReader(bufferedImage, kernelLines);
 
         System.out.println("Reading input file: " + inputFile);
 

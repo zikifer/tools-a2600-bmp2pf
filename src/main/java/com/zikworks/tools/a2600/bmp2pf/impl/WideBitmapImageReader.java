@@ -10,8 +10,8 @@ import java.io.IOException;
  */
 public class WideBitmapImageReader extends BitmapImageReader {
 
-    public WideBitmapImageReader(BufferedImage bufferedImage) {
-        super(bufferedImage);
+    public WideBitmapImageReader(BufferedImage bufferedImage, int kernelLines) {
+        super(bufferedImage, kernelLines);
     }
 
     @Override

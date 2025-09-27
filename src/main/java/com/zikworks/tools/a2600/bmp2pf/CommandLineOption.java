@@ -15,6 +15,7 @@ public enum CommandLineOption {
     ASYMMETRICAL("a", "asymmetrical", false, false, "Generate asymmetrical playfield"),
     MIRRORED("m", "mirrored", false, false, "When asymmetrical mirror PF registers"),
     REPEATED("r", "repeated", false, false, "When asymmetrical repeat PF registers"),
+    KERNEL("k", "kernel", false, true, "Number of scan lines per kernel loop (default 1)"),
     NO_COLOR(null, "no-color", false, false, "Do not add color info to output file"),
     NO_COLLISION(null, "no-collision", false, false, "Do not add collision info to output file");
 

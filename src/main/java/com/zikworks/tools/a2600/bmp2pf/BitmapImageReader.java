@@ -13,12 +13,14 @@ public abstract class BitmapImageReader implements Iterator<PlayfieldLineData> {
     private final BufferedImage bufferedImage;
     private final ColorModel colorModel;
     private final int imageHeight;
+    private final int kernelLines;
     private int currentLine;
 
-    public BitmapImageReader(BufferedImage bufferedImage) {
+    public BitmapImageReader(BufferedImage bufferedImage, int kernelLines) {
         this.bufferedImage = bufferedImage;
         this.colorModel = bufferedImage.getColorModel();
         this.imageHeight = bufferedImage.getHeight();
+        this.kernelLines = kernelLines;
         this.currentLine = 0;
     }
 
@@ -41,7 +43,9 @@ public abstract class BitmapImageReader implements Iterator<PlayfieldLineData> {
      */
     @Override
     public PlayfieldLineData next() {
-        return readLine(currentLine++);
+        int line = currentLine;
+        currentLine += kernelLines;
+        return readLine(line);
     }
 
     protected abstract PlayfieldLineData readLine(int line);

@@ -10,8 +10,8 @@ import java.io.IOException;
  */
 public class NarrowBitmapImageReader extends BitmapImageReader {
 
-    public NarrowBitmapImageReader(BufferedImage bufferedImage) {
-        super(bufferedImage);
+    public NarrowBitmapImageReader(BufferedImage bufferedImage, int kernelLines) {
+        super(bufferedImage, kernelLines);
     }
 
     @Override
