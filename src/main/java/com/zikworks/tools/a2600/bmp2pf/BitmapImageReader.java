@@ -59,9 +59,14 @@ public abstract class BitmapImageReader implements Iterator<PlayfieldLineData> {
     }
 
     protected boolean getBit(int rgb) {
-        return colorModel.hasAlpha()
-                ? (colorModel.getAlpha(rgb) != 0)
-                : (rgb != -1);
+        if (rgb == -1) {
+            return false;
+        }
+
+        int ntscColor = getNtscColor(rgb);
+        int palColor = getPalColor(rgb);
+        boolean isVisible = !colorModel.hasAlpha() || colorModel.getAlpha(rgb) > 0;
+        return isVisible && ((ntscColor > 0) || (palColor > 0));
     }
 
     protected int getNtscColor(int rgb) {

@@ -47,7 +47,7 @@ public class WideBitmapImageReader extends BitmapImageReader {
             boolean bit = getBit(rgb);
             int ntsc = bit ? getNtscColor(rgb) : 0;
             int pal = bit ? getPalColor(rgb) : 0;
-            boolean collide = bit && isCollision(rgb);
+            boolean collide = isCollision(rgb);
 
             widePixel += (bit) ? 1 : 0;
             if (wideNtsc == 0) {

@@ -16,8 +16,10 @@ public enum CommandLineOption {
     MIRRORED("m", "mirrored", false, false, "When asymmetrical mirror PF registers"),
     REPEATED("r", "repeated", false, false, "When asymmetrical repeat PF registers"),
     KERNEL("k", "kernel", false, true, "Number of scan lines per kernel loop (default 1)"),
+    COLLISION_RESOLUTION("c", "collision-resolution", false, true, "Number of scan lines per collision line"),
     NO_COLOR(null, "no-color", false, false, "Do not add color info to output file"),
-    NO_COLLISION(null, "no-collision", false, false, "Do not add collision info to output file");
+    NO_COLLISION(null, "no-collision", false, false, "Do not add collision info to output file"),
+    SEPARATE_COLLISION(null, "separate-collision-file", false, false, "Use a separate output file for collision data");
 
     final Option option;
 

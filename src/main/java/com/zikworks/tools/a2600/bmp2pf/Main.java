@@ -23,8 +23,10 @@ public class Main {
                 .addOption(CommandLineOption.REPEATED.toOption())
                 .addOption(CommandLineOption.MIRRORED.toOption())
                 .addOption(CommandLineOption.KERNEL.toOption())
+                .addOption(CommandLineOption.COLLISION_RESOLUTION.toOption())
                 .addOption(CommandLineOption.NO_COLOR.toOption())
-                .addOption(CommandLineOption.NO_COLLISION.toOption());
+                .addOption(CommandLineOption.NO_COLLISION.toOption())
+                .addOption(CommandLineOption.SEPARATE_COLLISION.toOption());
 
         CommandLineParser commandLineParser = new DefaultParser();
 

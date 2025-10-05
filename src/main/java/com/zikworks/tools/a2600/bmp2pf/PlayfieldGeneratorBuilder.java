@@ -34,9 +34,10 @@ public class PlayfieldGeneratorBuilder {
     private final String outputFile;
     private final boolean fullScale;
     private final boolean excludeColor;
-    private final boolean excludeCollision;
     private final int kernelLines;
+    private final int collisionLines;
     private final int outputBufferLines;
+    private final boolean separateCollisionFile;
     private GeneratorMode generatorMode = GeneratorMode.SYMMETRICAL;
     private PlayfieldRegistersMode playfieldRegistersMode = PlayfieldRegistersMode.REPEAT;
 
@@ -45,13 +46,25 @@ public class PlayfieldGeneratorBuilder {
         this.outputFile = commandLine.getOptionValue(CommandLineOption.OUTPUT_FILE.toOption());
         this.fullScale = commandLine.hasOption(CommandLineOption.FULL_SCALE.toOption());
         this.excludeColor = commandLine.hasOption(CommandLineOption.NO_COLOR.toOption());
-        this.excludeCollision = commandLine.hasOption(CommandLineOption.NO_COLLISION.toOption());
+        this.separateCollisionFile = commandLine.hasOption(CommandLineOption.SEPARATE_COLLISION.toOption());
         this.kernelLines = commandLine.hasOption(CommandLineOption.KERNEL.toOption())
                 ? Integer.parseInt(commandLine.getOptionValue(CommandLineOption.KERNEL.toOption()))
                 : 1;
         this.outputBufferLines = commandLine.hasOption(CommandLineOption.BUFFER_OUTPUT.toOption())
                 ? Integer.parseInt(commandLine.getOptionValue(CommandLineOption.BUFFER_OUTPUT.toOption()))
                 : 0;
+
+        if (commandLine.hasOption(CommandLineOption.NO_COLLISION.toOption())) {
+            collisionLines = 0;
+        } else {
+            if (commandLine.hasOption(CommandLineOption.COLLISION_RESOLUTION.toOption())) {
+                collisionLines = Math.max(
+                        Integer.parseInt(commandLine.getOptionValue(CommandLineOption.COLLISION_RESOLUTION.toOption())),
+                        kernelLines);
+            } else {
+                collisionLines = kernelLines;
+            }
+        }
 
         if (commandLine.hasOption(CommandLineOption.ASYMMETRICAL.toOption())) {
             this.generatorMode = GeneratorMode.ASYMMETRICAL;
@@ -69,6 +82,7 @@ public class PlayfieldGeneratorBuilder {
         System.out.println(" - Output File: " + outputFile);
         System.out.println(" - Scaled? " + fullScale);
         System.out.println(" - Number of scan lines per kernel loop: " + kernelLines);
+        System.out.println(" - Number of scan lines per collision line: " + collisionLines);
         System.out.println(" - Output Buffer Lines: " + outputBufferLines);
 
         String mode = generatorMode == GeneratorMode.SYMMETRICAL
@@ -93,16 +107,20 @@ public class PlayfieldGeneratorBuilder {
         return excludeColor;
     }
 
-    public boolean isExcludeCollision() {
-        return excludeCollision;
-    }
-
     public int getKernelLines() {
         return kernelLines;
     }
 
+    public int getCollisionLines() {
+        return collisionLines;
+    }
+
     public int getOutputBufferLines() {
         return outputBufferLines;
+    }
+
+    public boolean isSeparateCollisionFile() {
+        return separateCollisionFile;
     }
 
     /**
