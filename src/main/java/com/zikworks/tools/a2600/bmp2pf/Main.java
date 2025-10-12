@@ -26,7 +26,8 @@ public class Main {
                 .addOption(CommandLineOption.COLLISION_RESOLUTION.toOption())
                 .addOption(CommandLineOption.NO_COLOR.toOption())
                 .addOption(CommandLineOption.NO_COLLISION.toOption())
-                .addOption(CommandLineOption.SEPARATE_COLLISION.toOption());
+                .addOption(CommandLineOption.SEPARATE_COLLISION.toOption())
+                .addOption(CommandLineOption.OUTPUT_SECTION_PREFIX.toOption());
 
         CommandLineParser commandLineParser = new DefaultParser();
 

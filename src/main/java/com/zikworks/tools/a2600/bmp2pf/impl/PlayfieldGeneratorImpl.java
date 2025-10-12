@@ -44,6 +44,7 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
     private final int collisionLines;
     private final int outputBufferLines;
     private final boolean separateCollisionFile;
+    private final String outputSectionPrefix;
     private final PlayfieldLineDataParser parser;
     private final Map<PlayfieldOutputSection, List<String>> outputMap;
     private int lineCount = 0;
@@ -57,6 +58,7 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
         this.collisionLines = builder.getCollisionLines();
         this.outputBufferLines = builder.getOutputBufferLines();
         this.separateCollisionFile = builder.isSeparateCollisionFile();
+        this.outputSectionPrefix = builder.getOutputSectionPrefix();
         this.parser = parser;
         this.outputMap = new LinkedHashMap<>();
     }
@@ -176,7 +178,7 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
                 }
 
                 writer.write(ALIGNMENT_BLOCK);
-                writer.write(section.name() + System.lineSeparator());
+                writer.write(outputSectionPrefix + section.name() + System.lineSeparator());
                 for (String dataLine : outputMap.get(section)) {
                     writer.write(dataLine + System.lineSeparator());
                 }

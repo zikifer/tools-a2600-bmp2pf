@@ -38,6 +38,7 @@ public class PlayfieldGeneratorBuilder {
     private final int collisionLines;
     private final int outputBufferLines;
     private final boolean separateCollisionFile;
+    private final String outputSectionPrefix;
     private GeneratorMode generatorMode = GeneratorMode.SYMMETRICAL;
     private PlayfieldRegistersMode playfieldRegistersMode = PlayfieldRegistersMode.REPEAT;
 
@@ -53,6 +54,10 @@ public class PlayfieldGeneratorBuilder {
         this.outputBufferLines = commandLine.hasOption(CommandLineOption.BUFFER_OUTPUT.toOption())
                 ? Integer.parseInt(commandLine.getOptionValue(CommandLineOption.BUFFER_OUTPUT.toOption()))
                 : 0;
+
+        this.outputSectionPrefix = commandLine.hasOption(CommandLineOption.OUTPUT_SECTION_PREFIX.toOption())
+                ? commandLine.getOptionValue(CommandLineOption.OUTPUT_SECTION_PREFIX.toOption())
+                : "";
 
         if (commandLine.hasOption(CommandLineOption.NO_COLLISION.toOption())) {
             collisionLines = 0;
@@ -121,6 +126,10 @@ public class PlayfieldGeneratorBuilder {
 
     public boolean isSeparateCollisionFile() {
         return separateCollisionFile;
+    }
+
+    public String getOutputSectionPrefix() {
+        return outputSectionPrefix;
     }
 
     /**
