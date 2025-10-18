@@ -215,14 +215,14 @@ public class PlayfieldGeneratorImpl implements PlayfieldGenerator {
         for (int i = 0; i < data.size(); i += chunkSize, sectionCount++) {
             int end = Math.min(i + chunkSize, data.size());
             var sublist = new ArrayList<>(data.subList(i, end));
-            String sectionName = PlayfieldOutputSection.PFCollision.name() + sectionCount;
+            String sectionName = outputSectionPrefix + PlayfieldOutputSection.PFCollision.name() + sectionCount;
             writer.write(sectionName + System.lineSeparator());
             for (String dataLine : sublist) {
                 writer.write(dataLine + System.lineSeparator());
             }
         }
 
-        String sectionName = PlayfieldOutputSection.PFCollision.name();
+        String sectionName = outputSectionPrefix + PlayfieldOutputSection.PFCollision.name();
         writer.write(System.lineSeparator());
         writer.write(sectionName + "_Lo" + System.lineSeparator());
         for (int i = 0; i < sectionCount; i++) {
