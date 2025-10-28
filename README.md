@@ -31,9 +31,9 @@ will not match the actual color used in the file but at least the color data can
 * `-a`, `--asymmetrical` : Generate a file for an asymmetrical playfield.  An input BMP file of width 40 is required (or 160 if `-x` option is used).
 * `-r`, `--repeated` : When generating a file for an asymmetrical playfield assume the input file is in the format "PF0 PF1 PF2 PF0 PF1 PF2", meaning the first 4 pixels are for PF0, the next 8 for PF1, the next 8 for PF2, the next 4 for PF0, etc.  This is the default if `-a` is specified but `-m` is not.
 * `-m`, `--mirrored` : When generating a file for an asymmetrical playfield assume the input file is in the format "PF0 PF1 PF2 PF2 PF1 PF0", meaning the first 4 pixels are for PF0, the next 8 for PF1, the next 8 for PF2, the next 8 for PF2, etc.
-* `-k`, `--kernel` : Number of scan lines per kernel loop (default 1)
-* `-c`, `--collision-resolution` : Number of scan lines per collision line
+* `-k`, `--kernel <arg>` : Number of scan lines per kernel loop (default 1)
+* `-c`, `--collision-resolution <arg>` : Number of scan lines per collision line (default `-k` option value)
 * `--no-color` : Do not add color info to output file
 * `--no-collision` : Do not add collision info to output file
 * `--separate-collision-file` : Use a separate output file for collision data
-* `--output-section-prefix` : Add a prefix to all the PFnData sections in the output file(s)
+* `--output-section-prefix <arg>` : Add a prefix to all the PFnData sections in the output file(s)
