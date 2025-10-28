@@ -20,7 +20,7 @@ public enum CommandLineOption {
     NO_COLOR(null, "no-color", false, false, "Do not add color info to output file"),
     NO_COLLISION(null, "no-collision", false, false, "Do not add collision info to output file"),
     SEPARATE_COLLISION(null, "separate-collision-file", false, false, "Use a separate output file for collision data"),
-    OUTPUT_SECTION_PREFIX(null, "output-section-prefix", false, true, "Add a prefix to all of the PFnData sections");
+    OUTPUT_SECTION_PREFIX(null, "output-section-prefix", false, true, "Add a prefix to all the PFnData sections in the output file(s)");
 
     final Option option;
 
